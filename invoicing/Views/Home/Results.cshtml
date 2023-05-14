@@ -1,0 +1,146 @@
+﻿@model InvoicingResultViewModel
+
+@{
+    ViewData["Title"] = "Resultado Facturación";
+}
+
+
+<div class="text-center">
+    <h1>Facturación para el empleado: <strong>@Model.FullName</strong></h1>
+
+    <form>
+        <fieldset disabled>
+
+            <div class="mb-3">
+                <label for="nameFinal" class="form-label">Nombre</label>
+                <input asp-for="FullName" type="text" class="form-control" id="nameFinal" />
+            </div>
+            <div class="mb-3">
+                <label for="antiguedadFinal" class="form-label">Antiguedad en meses</label>
+                <input asp-for="Antiquity" type="text" class="form-control" id="antiguedadFinal" />
+            </div>
+            <div class="mb-3">
+                <label for="valorHoras" class="form-label">Valor de horas trabajadas</label>
+                <input asp-for="Antiquity" type="text" class="form-control" id="valorHoras" />
+            </div>
+            <div class="mb-3">
+                <label for="totalBruto" class="form-label">total bruto</label>
+                <input asp-for="TotalReceivable" type="text" class="form-control" id="totalBruto" />
+            </div>
+            <div class="mb-3">
+                <label for="descuetos" class="form-label">total de descuentos </label>
+                <input asp-for="DescountTotal" type="text" class="form-control" id="descuetos" />
+            </div>
+            <div class="mb-3">
+                <label for="totalNeto" class="form-label">Valor neto</label>
+                <input asp-for="TotalPayable" type="text" class="form-control" id="totalNeto" />
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<div class="modal fade" id="onload" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Add this line to your code -->
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Envio de la Factura</h5>
+            </div>
+            <div class="modal-body">
+                <form id="formResults">
+                    <legend>Seleccionar el medio de envio de la factura </legend>
+                    <div class="mb-3">
+                        <label for="disabledSelect" class="form-label">Selecione</label>
+                        <select id="select" class="form-select" name="selectSend" required>
+                            <option value="1">Email</option>
+                            <option value="2">Dirección fisica</option>
+                            <option value="3">Mensaje de Texto</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="aditional-information">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="send-invoice">Enviar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+        const $element = document.querySelector("#aditional-information");
+
+        $(function () {
+            $element.innerHTML = `
+                <label for="email" class="form-label">Email</label>
+                <input asp-for="Email" type="text" class="form-control" name="email" placeholder="Email" required>
+            `;
+
+            $('#onload').modal('show');
+
+            $("#formResults").on("submit", function (e) {
+                $('#onload').modal('toggle');
+                e.preventDefault();
+               
+                const formValues = new FormData(e.target);
+
+                if (formValues.get('selectSend') == 1){
+                    document.querySelector('.text-center').innerHTML += `
+                      <div class="alert alert-primary" role="alert">
+                         Se a enviado exitosamente al correo: ${formValues.get("email")}
+                      </div>
+                    `;
+                }
+
+                if (formValues.get('selectSend') == 2) {
+                    document.querySelector('.text-center').innerHTML += `
+                      <div class="alert alert-primary" role="alert">
+                        Llegara aproximadante en 24 horas a la dirección: ${formValues.get('address')}
+                      </div>
+                    `;
+                }
+
+                if (formValues.get('selectSend') == 3) {
+                    document.querySelector('.text-center').innerHTML += `
+                       <div class="alert alert-primary" role="alert">
+                          Llegara aproximadante en 24 horas a la dirección: ${formValues.get('phone')}
+                      </div>
+                    `;
+                }
+
+            });
+
+            $('#select').change(function () {
+                const selectedValue = $(this).find("option:selected").attr('value') || 1;
+
+                if (!selectedValue || selectedValue == 1) {
+                    $element.innerHTML = `
+                        <label for="email" class="form-label">Email</label>
+                        <input asp-for="Email" type="email" class="form-control" name="email" placeholder="Email" required>
+                    `;
+                    return;
+                }
+
+                if (selectedValue == 2) {
+                    $element.innerHTML = `
+                        <label for="address" class="form-label">Dirección</label>
+                        <input asp-for="Address" type="text" class="form-control" name="address" placeholder="Dirección" required>
+                    `;
+                    return;
+                }
+
+                if (selectedValue == 3) {
+                    $element.innerHTML = `
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input asp-for="Phone" type="tel" class="form-control" name="phone" placeholder="Teléfono" required>
+                    `;
+                    return;
+                }
+            });
+        });
+    </script>
+}
